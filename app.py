@@ -45,7 +45,7 @@ def chat():
     prompt = data.get("prompt", "")
 
     try:
-        model = genai.GenerativeModel("gemini-pro")
+        model = genai.GenerativeModel("gemini-1.5-pro")
         response = model.generate_content(prompt)
         return jsonify({"result": response.text})
     except Exception as e:
