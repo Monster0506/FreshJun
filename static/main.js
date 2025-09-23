@@ -184,24 +184,7 @@ zoomOutBtn.addEventListener("click", () => {
   zoomValueOutput.innerText = zoomValue + "%";
 });
 
-
-
-
-   // Initialize Gemini
-   const API_KEY = 'AIzaSyAZPonbbNVi95Ih8djjo3RhFfxYDCjVj1g'; // Replace with your Gemini API key
-   const MODEL_NAME = 'gemini-pro';
-
-   async function initializeGemini() {
-       const { GoogleGenerativeAI } = await import("https://esm.run/@google/generative-ai");
-       const genAI = new GoogleGenerativeAI(API_KEY);
-       return genAI.getGenerativeModel({ model: MODEL_NAME });
-   }
-
-   let model;
-   initializeGemini().then(initializedModel => {
-       model = initializedModel;
-   });
-
+/*
    // Chat functions
    function addMessage(message, isUser = false) {
        const chatMessages = document.getElementById('chat-messages');
@@ -241,4 +224,45 @@ zoomOutBtn.addEventListener("click", () => {
        if (e.key === 'Enter') {
            sendMessage();
        }
-   });
+   });*/
+
+   // Chat functions
+function addMessage(message, isUser = false) {
+    const chatMessages = document.getElementById('chat-messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+    messageDiv.textContent = message;
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+async function sendMessage() {
+    const userInput = document.getElementById('user-input');
+    const message = userInput.value.trim();
+    
+    if (!message) return;
+
+    addMessage(message, true);
+    userInput.value = '';
+
+    try {
+        const res = await fetch("/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt: message })
+        });
+
+        const data = await res.json();
+        addMessage(data.result || data.error);
+    } catch (err) {
+        console.error(err);
+        addMessage("Sorry, I'm having trouble connecting right now.");
+    }
+}
+
+// Handle Enter key
+document.getElementById('user-input').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        sendMessage();
+    }
+});
